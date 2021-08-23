@@ -9,5 +9,5 @@
   window.setPlayer = function(_set){if (safe){player.name = (_set.name)? _set.name : player.name; player.health = (_set.health)? _set.health: player.health;}}
   let protReturn = protectObject(player, [getPlayer, setPlayer]);
   safe = (protReturn === true);
-  console.log(`Protected Object Safe: ${safe}. Protection return: ${protReturn}`);
+  console.log(`Protected Object Safe: ${safe}. Protection return: ${JSON.stringify(protReturn)}`);
 })();
