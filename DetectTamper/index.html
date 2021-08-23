@@ -1,7 +1,7 @@
 <html>
   <head>
     <script>
-      /*var dump = [];
+      var dump = [];
 (function(startObj, startPath, dumpArray) {
     let getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
     let getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
@@ -95,12 +95,12 @@
     };
 })(window, "window", dump)
 
-      console.log(dump);
+      console.log('Hook Everything Dump:', dump);
 
       // block
       //let oldprotoof = Object.getPrototypeOf;
       //Object.getPrototypeOf = function(){console.log(this, arguments, arguments.callee); return oldprotoof.apply(this, arguments);};
-      */
+      
       var detectedTamper = false;
       var tamperScripts = [];
       var oldSub = String.prototype.substr;
