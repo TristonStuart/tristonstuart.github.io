@@ -1,0 +1,105 @@
+<html>
+  <head>
+    <script>
+      var dump = [];
+(function(startObj, startPath, dumpArray) {
+    let getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
+    let getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+    let defineProperty = Object.defineProperty;
+    let getOwnPropertyNames = Object.getOwnPropertyNames;
+    let construct = Reflect.construct;
+    let fapply = Function.prototype.apply;
+    let push = Array.prototype.push;
+    push._fapply = fapply;
+    let _Error = Error;
+    let hooks = [];
+    let captured = {};
+    let hookId = 0;
+    let checked = [];
+    let errors = [];
+    let mainFunc = arguments.callee;
+
+    function hook(_parent, _objName, parentString) {
+        try {
+            let nameString = parentString + "." + _objName;
+            if (_objName == "arguments" || _objName == "caller" || _objName == "callee") {
+                return;
+            }
+            if (hooks.includes(_parent[_objName])) {
+                return;
+            }
+            if (typeof _parent[_objName] == "function") {
+                hookId++;
+                let desc = getOwnPropertyDescriptors(_parent[_objName]);
+                let orig = _parent[_objName];
+                orig._fapply = fapply;
+                captured[nameString] = [];
+                _parent[_objName] = function() {
+                    let rt = (new.target) ? construct(orig, arguments) : orig._fapply(this, arguments);
+                    if (arguments.callee.caller != hook && arguments.callee.caller != hookProps && arguments.callee.caller != mainFunc) {
+                        push._fapply(captured[nameString], [{
+                            args: arguments,
+                            that: this,
+                            return: rt,
+                            caller: arguments.callee.caller,
+                            stack: new _Error().stack
+                        }]);
+                    }
+                    return rt;
+                }
+                for (let j in desc) {
+                    defineProperty(_parent[_objName], j, desc[j])
+                }
+                hooks.push(_parent[_objName]);
+            }
+        } catch (e) {
+            errors.push(e)
+        }
+    }
+
+    function hookProps(parent, prop, path) {
+        for (let i of getOwnPropertyNames(parent[prop])) {
+            try {
+                if (getOwnPropertyDescriptor(parent[prop], i).get === undefined && parent[prop][i] != null && parent[prop][i] !== undefined && (typeof parent[prop][i] == "function" || typeof parent[prop][i] == "object") && !checked.includes(parent[prop][i])) {
+                    checked.push(parent[prop][i]);
+                    if (typeof parent[prop][i] == "function") {
+                        hook(parent[prop], i, path + "." + prop);
+                    }
+                    hookProps(parent[prop], i, path + "." + prop);
+                }
+            } catch (e) {}
+        }
+    }
+    for (let i of getOwnPropertyNames(startObj)) {
+        if (getOwnPropertyDescriptor(startObj, i).get === undefined && startObj[i] != null && startObj[i] !== undefined && (typeof startObj[i] == "function" || typeof startObj[i] == "object") && !checked.includes(startObj[i])) {
+            checked.push(startObj[i]);
+            if (typeof startObj[i] == "function") {
+                hook(startObj, i, startPath);
+            }
+            hookProps(startObj, i, startPath);
+        }
+    }
+    if (dumpArray) {
+        dumpArray.push({
+            hooks,
+            captured,
+            errors,
+            startPath
+        })
+    }
+    return {
+        hooks,
+        captured,
+        errors,
+        startPath
+    };
+})(window, "window", dump)
+
+      console.log(dump);
+
+      // block
+      //let oldprotoof = Object.getPrototypeOf;
+      //Object.getPrototypeOf = function(){console.log(this, arguments, arguments.callee); return oldprotoof.apply(this, arguments);};
+    </script>
+  </head>
+</html>
