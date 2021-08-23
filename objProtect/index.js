@@ -8,4 +8,5 @@
   window.getPlayer = function(){return (safe)? {name: player.name, health: player.health} : "Tampered"};
   window.setPlayer = function(_set){if (safe){player.name = (_set.name)? _set.name : player.name; player.health = (_set.health)? _set.health: player.health;}}
   safe = protectObject(player, [getPlayer, setPlayer]);
+  console.log(`Protected Object Safe: ${safe}`);
 })();
