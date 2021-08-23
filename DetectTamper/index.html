@@ -1,7 +1,7 @@
 <html>
   <head>
     <script>
-      var dump = [];
+      /*var dump = [];
 (function(startObj, startPath, dumpArray) {
     let getOwnPropertyDescriptors = Object.getOwnPropertyDescriptors;
     let getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
@@ -100,6 +100,30 @@
       // block
       //let oldprotoof = Object.getPrototypeOf;
       //Object.getPrototypeOf = function(){console.log(this, arguments, arguments.callee); return oldprotoof.apply(this, arguments);};
+      */
+      var detectedTamper = false;
+      var tamperScripts = [];
+      var oldSub = String.prototype.substr;
+      var oldToStr = String.prototype.toString;
+      let oldexec = RegExp.prototype.exec;
+      String.prototype.substr = function(){
+        let ret = oldSub.apply(this, arguments);
+        if (ret == "GM_" || ret == "GM."){detectedTamper = true;}
+        return ret;
+      }
+      String.prototype.toString = function(){
+        let ret = oldToStr.apply(this, arguments);
+        if (ret == "GM.info"){detectedTamper = true;}
+        return ret;
+      }
+      RegExp.prototype.exec = function(){
+        if (String(this) == String(/["']/g)){
+          // posible tamper script name
+          tamperScripts.push(arguments[0]);
+        }
+        let ret = oldexec.apply(this, arguments);
+        return ret;
+      }
     </script>
   </head>
 </html>
